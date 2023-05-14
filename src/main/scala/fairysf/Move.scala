@@ -20,7 +20,8 @@ case class Move(
   def situationAfter =
     Situation(
       finalizeAfter,
-      if (before.variant.switchPlayerAfterMove) !piece.player else piece.player
+      if (before.variant.switchPlayerAfterMove) !piece.player else piece.player,
+      Some(this)
     )
 
   def finalizeAfter: Board = after updateHistory { h =>

@@ -130,8 +130,9 @@ object Replay {
 
     val init     = makeGame(variant, initialFen.some)
     var state    = init
-    var uciMoves = init.situation.board.uciMoves
     var errors   = ""
+    val lastMove = init.situation.lastMove
+    var uciMoves = init.situation.board.uciMoves
 
     def getApiPosition(uciMove: String) = state.board.apiPosition.makeMoves(List(uciMove))
 
@@ -186,7 +187,7 @@ object Replay {
         }
       }
 
-    def parseMoveOrDropWithPrevious(moveStr: String, prevStr: Option[String]): (Game, MoveOrDrop) =
+    def parseMoveOrDropWithPrevious(moveStr: String, prevStr: Option[String]): (Game, MoveOrDrop) = {
       moveStr match {
         case Uci.Move.moveR(orig, dest, promotion) =>
           replayMoveFromUci(
@@ -202,6 +203,7 @@ object Replay {
           )
         case moveStr: String                       => sys.error(s"Invalid moveordrop for replay: $moveStr")
       }
+    }
 
     def parseMoveOrDrop(moveStr: String): (Game, MoveOrDrop) =
       parseMoveOrDropWithPrevious(moveStr, None)
@@ -210,10 +212,19 @@ object Replay {
       if (!variant.switchPlayerAfterMove) {
         // Amazons. Don't want doubleMoveFormat from Parser, so dont ask for it
         val moves       = Parser.pgnMovesToUciMoves(moveStrs)
-        val firstMove   = moves.headOption.toList
-        val pairedMoves = if (moves == firstMove) List() else moves.sliding(2)
-        (firstMove.map(parseMoveOrDrop)) ::: pairedMoves.map { case List(prev, move) =>
-          parseMoveOrDropWithPrevious(move, Some(prev))
+        val pairedMoves = List((lastMove.map(_.toUci.uci), moves.head)) ++ (if (moves.length == 1) List()
+                                                                            else
+                                                                              moves
+                                                                                .sliding(2)
+                                                                                .map {
+                                                                                  case List(a, b) =>
+                                                                                    (Some(a), b)
+                                                                                  case List(a)    =>
+                                                                                    (None, a) // This will really never happen
+                                                                                })
+
+        pairedMoves.map { case (prev, move) =>
+          parseMoveOrDropWithPrevious(move, prev)
         }.toList
       } else {
         Parser.pgnMovesToUciMoves(moveStrs).map(parseMoveOrDrop)

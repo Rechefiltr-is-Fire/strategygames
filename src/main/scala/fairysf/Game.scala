@@ -83,6 +83,7 @@ object Game {
   def apply(variantOption: Option[strategygames.fairysf.variant.Variant], fen: Option[FEN]): Game = {
     val variant = variantOption | strategygames.fairysf.variant.Variant.default
     val g       = apply(variant)
+    println("fen")
     fen
       .flatMap {
         format.Forsyth.<<<@(variant, _)
@@ -96,7 +97,10 @@ object Game {
             player = parsed.situation.player,
             lastMove = parsed.situation.lastMove
           ),
-          turns = parsed.turns
+          turns = {
+            println(s"parsed.turns: ${parsed.turns}")
+            parsed.turns
+          }
         )
       }
   }

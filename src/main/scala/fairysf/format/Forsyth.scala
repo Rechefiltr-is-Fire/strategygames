@@ -10,6 +10,10 @@ import strategygames.fairysf.variant.Variant
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
   */
 object Forsyth {
+  def pp[A](s: String, a: A): A = {
+    println(s"${s}: ${a}")
+    a
+  }
 
   // lishogi
   // val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1")
@@ -51,8 +55,8 @@ object Forsyth {
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
   case class SituationPlus(situation: Situation, fullMoveNumber: Int) {
-
     def turns = fullMoveNumber * 2 - situation.player.fold(2, 1)
+    def plys  = turns
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
@@ -60,7 +64,18 @@ object Forsyth {
       SituationPlus(
         // not doing half move clock history like we do in chess
         sit,
-        fen.value.split(' ').last.toIntOption.map(_ max 1 min 500) | 1
+        pp(
+          "final",
+          (pp(
+            "fullMoveNumber",
+            pp("fen", fen).value
+              .split(' ')
+              .reverse
+              .head
+              .toIntOption
+          )
+            .map(_ max 1 min 500) | 1) + (pp("halfMoveCount", fen.value.count('½'.==)))
+        )
       )
     }
 

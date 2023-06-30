@@ -16,7 +16,7 @@ case object NightyZones
       boardSize = Board.Dim10x10
     ) {
 
-  def gameFamily: GameFamily = GameFamily.Amazons()
+  def gameFamily: GameFamily = GameFamily.NightyZones()
 
   def perfIcon: Char = 'Д'
   def perfId: Int    = 206

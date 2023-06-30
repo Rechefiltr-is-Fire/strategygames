@@ -28,6 +28,7 @@ abstract class Variant private[variant] (
   def flipello    = this == Flipello
   def flipello10  = this == Flipello10
   def amazons     = this == Amazons
+  def nightyzones = this == NightyZones
 
   def exotic = true
 
